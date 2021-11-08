@@ -24,6 +24,13 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+ // res.send("<html><body>Hello <b>World</b></body></html>\n");
+ const templateVars = { greeting: 'Hello World2', run: 'hi'};
+ res.render("hello_world", templateVars);
+});
+
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
