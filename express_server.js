@@ -10,13 +10,6 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
 
-
-// app.post("/urls", (req, res) => {
-//   console.log(req.body);  // Log the POST request body to the console
-//   res.send("Ok");         // Respond with 'Ok' (we will replace this)
-// });
-
-
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -58,6 +51,7 @@ app.get("/urls/:shortURL", (req, res) => {
  // console.log(shortUrl+"database:"+urlDatabase[shortUrl]);
   const templateVars = {shortURL: shortUrl, longURL: urlDatabase[shortUrl]};
   res.render("urls_show", templateVars);
+  //res.redirect(urlDatabase[shortUrl]);
 
 
 });
@@ -73,8 +67,17 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortUrl] = req.body.longURL;
   
   //console.log(urlDatabase);
-  res.send(`/urls/${shortUrl}`);
+  res.redirect(`/urls/${shortUrl}`);
   console.log(req.body);
+
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const shortUrl = req.params.shortURL;
+ 
+  const longUrl = urlDatabase[shortUrl];
+  res.redirect(longUrl);
+
 
 });
 
