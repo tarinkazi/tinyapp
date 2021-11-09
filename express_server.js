@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 // });
 
 
-const urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -63,8 +63,19 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  
+  let msg = req.body;
+  for(let key in msg) {
+    msg = msg[key];
+  }
+  
+  let shortUrl = generateRandomString();
+  urlDatabase[shortUrl] = req.body.longURL;
+  
+  //console.log(urlDatabase);
+  res.send(`/urls/${shortUrl}`);
+  console.log(req.body);
+
 });
 
 
@@ -75,7 +86,7 @@ function generateRandomString() {
 
   let result = ' ';
     const charactersLength = 6;
-    for ( let i = 0; i < length; i++ ) {
+    for ( let i = 0; i < 6; i++ ) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
 
