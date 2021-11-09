@@ -72,6 +72,21 @@ app.post("/urls", (req, res) => {
 
 });
 
+
+//update
+app.post("/urls/:shortURL", (req, res) => {
+  
+  const shortUrl = req.params.shortURL;
+  const longUrl = req.body.longURL;
+  urlDatabase[shortUrl]= longUrl;
+res.redirect('/urls');
+
+
+
+  //console.log(req.body);
+
+});
+
 app.get("/u/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
  
@@ -80,6 +95,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 });
+
 //for delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   
@@ -88,6 +104,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   //console.log(req.body);
 
 });
+
 
 
 
