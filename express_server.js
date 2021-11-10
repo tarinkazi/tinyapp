@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
 
 
 
@@ -16,15 +18,34 @@ let urlDatabase = {
 };
 
 
+//add cookie 
+app.post('/login', (req, res) => {
+
+  const username = req.body.username;
+  console.log('Login:'+username);
+  res.cookie('username',username);
+
+  //console.log(res.cookie('username',username));
+ 
+  res.redirect('/urls');
+
+
+});
+
+//delete cookie (username)
+app.post("/logout", (req, res)=> {
+  let username = req.body.username
+  res.clearCookie('username', username)
+
+  res.redirect("/urls")
+});
+
+
 
 app.get("/", (req, res) => {
   res.send("Hello");
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-
-});
 
 
 app.get("/urls.json", (req, res) => {
@@ -38,20 +59,27 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  let username = req.cookies["username"];
+  console.log('orls_inde:'+username);
+  const templateVars = { username: username, urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let username = req.cookies["username"];
+  console.log('urls_new'+username);
+  const templateVars = { username: username, urls: urlDatabase };
+  res.render("urls_new",templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
+  let username =  req.cookies["username"];
+  console.log('urlshow'+username);
  // console.log(shortUrl+"database:"+urlDatabase[shortUrl]);
-  const templateVars = {shortURL: shortUrl, longURL: urlDatabase[shortUrl]};
+  const templateVars = {username: username, shortURL: shortUrl, longURL: urlDatabase[shortUrl]};
   res.render("urls_show", templateVars);
-  //res.redirect(urlDatabase[shortUrl]);
+  
 
 
 });
@@ -102,6 +130,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
   //console.log(req.body);
+
+});
+
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 
 });
 
