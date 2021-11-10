@@ -116,9 +116,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  //let username = req.cookies["username"];
-  //const templateVars = { username: username, urls: urlDatabase };
-  res.render("urls_register",templateVars);
+  res.render("urls_register");
 });
 
 
