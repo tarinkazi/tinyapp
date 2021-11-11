@@ -46,10 +46,8 @@ app.post('/login', (req, res) => {
 
 //delete cookie (username)
 app.post("/logout", (req, res)=> {
-  console.log('brandom');
   let user = users[req.cookies["id"]];
   res.clearCookie('id', user);
-console.log('user:',user);
   res.redirect("/urls");
 });
 
@@ -60,12 +58,21 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-
-  let id = generateRandomString();
+let user ={email: req.body.email, password:req.body.password};
+  
+  let getId = emailLookup(user);
+  console.log('user:====>',getId);
+  if(getId){
+    let id = generateRandomString();
   users[id] = {id: id, email: req.body.email, password:req.body.password};
-  res.cookie('id',id);
+  //console.log(users);
+    res.cookie('id',id);
   res.redirect("/urls");
  // console.log(users);
+  } else {
+    res.send(" Error 400");
+  }
+  
 
 });
 
@@ -159,6 +166,24 @@ app.listen(PORT, () => {
 
 });
 
+function emailLookup(user) {
+  // if(user.email === null || user.password === null) {
+  //   return false;
+  // }
+if(user.email !== "" && user.password !== "") {
+  for (let key in users) {
+    if (users[key].email === user.email) {
+      return false;
+    }
+    
+    
+  }
+  return true;
+}
+return false;
+
+}
+
 
 
 
@@ -174,4 +199,3 @@ function generateRandomString() {
 
     return result;
 }
-
