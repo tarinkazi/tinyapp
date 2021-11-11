@@ -31,17 +31,21 @@ const users = {
   }
 }
 
+app.get('/login', (req, res) => {
+  const user = users[req.cookies["id"]];
+  const templateVars = { user: user, urls: urlDatabase };
+  res.render("urls_login",templateVars);
+});
 
 
 //add cookie 
 app.post('/login', (req, res) => {
-
-  //const username = req.body.username;
-  const user = users[req.cookies["id"]];
-  res.cookie('user',user);
-  res.redirect('/urls');
-
-
+  
+  let id = generateRandomString();
+  users[id] = {id: id, email: req.body.email, password:req.body.password};
+  
+    res.cookie('id',id);
+    res.redirect("/urls");
 });
 
 //delete cookie (username)
@@ -60,15 +64,13 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
 let user ={email: req.body.email, password:req.body.password};
   
-  let getId = emailLookup(user);
-  console.log('user:====>',getId);
-  if(getId){
+  let getMatch = emailLookup(user);
+  if(getMatch){
     let id = generateRandomString();
   users[id] = {id: id, email: req.body.email, password:req.body.password};
-  //console.log(users);
+  
     res.cookie('id',id);
-  res.redirect("/urls");
- // console.log(users);
+    res.redirect("/urls");
   } else {
     res.send(" Error 400");
   }
@@ -96,8 +98,6 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   
   const user = users[req.cookies["id"]];
-  //
-  
   const templateVars = { user: user, urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
@@ -119,15 +119,15 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 //db update
 app.post("/urls", (req, res) => {
-  let msg = req.body;
-  for(let key in msg) {
-    msg = msg[key];
-  }
+  // let msg = req.body;
+  // for(let key in msg) {
+  //   msg = msg[key];
+  // }
   let shortUrl = generateRandomString();
   urlDatabase[shortUrl] = req.body.longURL;
   
   res.redirect(`/urls/${shortUrl}`);
-  console.log(req.body);
+  //console.log(req.body);
 
 });
 
@@ -138,7 +138,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
   const longUrl = req.body.longURL;
   urlDatabase[shortUrl]= longUrl;
-res.redirect('/urls');
+  res.redirect('/urls');
 
 });
 
@@ -167,9 +167,7 @@ app.listen(PORT, () => {
 });
 
 function emailLookup(user) {
-  // if(user.email === null || user.password === null) {
-  //   return false;
-  // }
+  
 if(user.email !== "" && user.password !== "") {
   for (let key in users) {
     if (users[key].email === user.email) {
@@ -182,9 +180,7 @@ if(user.email !== "" && user.password !== "") {
 }
 return false;
 
-}
-
-
+};
 
 
 function generateRandomString() {
@@ -198,4 +194,4 @@ function generateRandomString() {
     }
 
     return result;
-}
+};
