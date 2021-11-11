@@ -48,7 +48,8 @@ app.post('/login', (req, res) => {
     res.cookie('id',id);
     res.redirect("/urls");
   } else {
-    res.send("Error 403");
+    //res.send("Error 403");
+    res.status(403).send('Bad Request')   
   }  
 });
 
@@ -76,7 +77,8 @@ let user ={email: req.body.email, password:req.body.password};
     res.cookie('id',id);
     res.redirect("/urls");
   } else {
-    res.send(" Error 400");
+    //res.send(" Error 400");
+    res.status(400).send('Bad Request')   
   }
   
 
