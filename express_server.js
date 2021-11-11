@@ -114,16 +114,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index",templateVars);
 
 });
-/////
-// const userUrls = (id, urlDatabase) => {
-//   let urls = {};
-//   for (const url in urlDatabase) {
-//     if (urlDatabase[url].userID === id) {
-//       urls[url] = urlDatabase[url];
-//     }
-//   }
-//   return urls;
-// };
+
 
 
 app.get("/urls/new", (req, res) => {
