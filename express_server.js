@@ -110,8 +110,12 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies["id"]];
+  if (user !== undefined) {
   const templateVars = { user: user, urls: urlDatabase };
   res.render("urls_new",templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
