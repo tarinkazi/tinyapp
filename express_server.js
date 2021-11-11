@@ -40,12 +40,16 @@ app.get('/login', (req, res) => {
 
 //add cookie 
 app.post('/login', (req, res) => {
+  let user ={email: req.body.email, password:req.body.password};
   
-  let id = generateRandomString();
-  users[id] = {id: id, email: req.body.email, password:req.body.password};
-  
+  let id = checkingEmailWithPass(user);
+
+  if(id !== false) {
     res.cookie('id',id);
     res.redirect("/urls");
+  } else {
+    res.send("Error 403");
+  }  
 });
 
 //delete cookie (username)
@@ -119,15 +123,12 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 //db update
 app.post("/urls", (req, res) => {
-  // let msg = req.body;
-  // for(let key in msg) {
-  //   msg = msg[key];
-  // }
+  
   let shortUrl = generateRandomString();
   urlDatabase[shortUrl] = req.body.longURL;
   
   res.redirect(`/urls/${shortUrl}`);
-  //console.log(req.body);
+  
 
 });
 
@@ -157,28 +158,37 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   
 });
 
-
-
-
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 
 });
 
-function emailLookup(user) {
-  
-if(user.email !== "" && user.password !== "") {
-  for (let key in users) {
-    if (users[key].email === user.email) {
-      return false;
+function checkingEmailWithPass(user){
+  if(user.password !=="" && user.email !== "") {
+    for(let key in users) {
+      if(users[key].email === user.email && users[key].password === user.password) {
+        return users[key].id;
+        
+      }
+
     }
     
-    
   }
-  return true;
+  return false;
 }
-return false;
+
+function emailLookup(user) {
+  
+  if(user.email !== "" && user.password !== "") {
+    for (let key in users) {
+      if (users[key].email === user.email) {
+        return false;
+      }
+      
+    }
+    return true;
+  }
+  return false;
 
 };
 
