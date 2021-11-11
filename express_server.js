@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
+
 app.use(cookieParser())
 
 
@@ -79,7 +81,7 @@ let user ={email: req.body.email, password:req.body.password};
   let getMatch = emailLookup(user);
   if(getMatch){
     let id = generateRandomString();
-  users[id] = {id: id, email: req.body.email, password:req.body.password};
+  users[id] = {id: id, email: req.body.email, password:bcrypt.hashSync(req.body.password, 10)};
   
     res.cookie('id',id);
     res.redirect("/urls");
@@ -191,7 +193,9 @@ app.listen(PORT, () => {
 function checkingEmailWithPass(user){
   if(user.password !=="" && user.email !== "") {
     for(let key in users) {
-      if(users[key].email === user.email && users[key].password === user.password) {
+      //if(users[key].email === user.email && users[key].password === user.password) {
+        if(users[key].email === user.email && bcrypt.compareSync(user.password, users[key].password)) {
+
         return users[key].id;
         
       }
