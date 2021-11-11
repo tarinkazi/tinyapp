@@ -109,6 +109,8 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+
+  
   const templateVars ={urls: urlDatabase, user: users[req.cookies["id"]] };
   console.log(templateVars);
   res.render("urls_index",templateVars);
@@ -188,6 +190,17 @@ function checkingEmailWithPass(user){
     
   }
   return false;
+}
+
+function urlsForUser(id) {
+
+  let urlist = [];
+  for(let key in urlDatabase) {
+    if(urlDatabase[key].userID === id){
+      urlist.push(urlDatabase[key].shortURL);
+    }
+  }
+  return urlist;
 }
 
 function emailLookup(user) {
