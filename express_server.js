@@ -109,12 +109,18 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const user = req.cookies["id"];
+  const url = urlsForUser(user);
+  console.log('url list:',url);
 
-  
-  const templateVars ={urls: urlDatabase, user: users[req.cookies["id"]] };
-  console.log(templateVars);
-  res.render("urls_index",templateVars);
+  if(url !== null) {
+    const templateVars ={urls: url, user: users[req.cookies["id"]] };
+   console.log(templateVars);
+   res.render("urls_index",templateVars);
 
+  }
+
+   
 });
 
 
@@ -132,7 +138,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
   const user = users[req.cookies["id"]];
-  const templateVars = {user: user, shortURL: shortUrl, longURL: urlDatabase[shortUrl].longURL};
+  if(shortUrl === undefined) {
+    res.send("400");
+  }
+   const templateVars = {user: user, shortURL: shortUrl, longURL: urlDatabase[shortUrl].longURL};
+  
   res.render("urls_show", templateVars);
   
 });
@@ -194,12 +204,13 @@ function checkingEmailWithPass(user){
 
 function urlsForUser(id) {
 
-  let urlist = [];
+  let urlist = {};
   for(let key in urlDatabase) {
     if(urlDatabase[key].userID === id){
-      urlist.push(urlDatabase[key].shortURL);
+      urlist[key] = urlDatabase[key];
     }
   }
+
   return urlist;
 }
 
