@@ -3,8 +3,7 @@ const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
-
-
+const {getUserByEmail, emailLookup, generateRandomString} = require('./helper');
 const bcrypt = require('bcryptjs');
 
 app.use(cookieParser());
@@ -39,7 +38,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: bcrypt.hashSync("purple-monkey-dinosaur", 10),
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
  "user2RandomID": {
     id: "user2RandomID", 
@@ -59,11 +58,11 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   let user ={email: req.body.email, password:req.body.password};
   
-  let id = checkingEmailWithPass(user);
+  let id = getUserByEmail(user, users);
 
   if(id !== false) {
-    req.session.id = id;///
-    //res.cookie("id",id);
+    req.session.id = id;
+    
     res.redirect("/urls");
   } else {
     //res.send("Error 403");
@@ -74,7 +73,7 @@ app.post('/login', (req, res) => {
 //delete cookie (username)
 app.post("/logout", (req, res)=> {
   let user = users[req.session.id];
-  //res.clearCookie('id', user);
+ 
   req.session = null;
   res.redirect("/urls");
 });
@@ -88,7 +87,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
 let user ={email: req.body.email, password:req.body.password};
   
-  let getMatch = emailLookup(user);
+  let getMatch = emailLookup(user, users);
   if(getMatch){
     let id = generateRandomString();
   users[id] = {id: id, email: req.body.email, password:bcrypt.hashSync(req.body.password, 10)};
@@ -201,21 +200,7 @@ app.listen(PORT, () => {
 
 });
 
-function checkingEmailWithPass(user){
-  if(user.password !=="" && user.email !== "") {
-    for(let key in users) {
-      //if(users[key].email === user.email && users[key].password === user.password) {
-        if(users[key].email === user.email && bcrypt.compareSync(user.password, users[key].password)) {
 
-        return users[key].id;
-        
-      }
-
-    }
-    
-  }
-  return false;
-}
 
 function urlsForUser(id) {
 
@@ -229,32 +214,9 @@ function urlsForUser(id) {
   return urlist;
 }
 
-function emailLookup(user) {
-  
-  if(user.email !== "" && user.password !== "") {
-    for (let key in users) {
-      if (users[key].email === user.email) {
-        return false;
-      }
-      
-    }
-    return true;
-  }
-  return false;
-
-};
 
 
-function generateRandomString() {
 
-  const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-  let result = ' ';
-    const charactersLength = 6;
-    for ( let i = 0; i < 6; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
 
-    return result;
-};
 
