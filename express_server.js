@@ -50,8 +50,8 @@ app.get('/login', (req, res) => {
 
 //add cookie Login
 app.post('/login', (req, res) => {
-  let user ={email: req.body.email, password:req.body.password};
-  let id = getUserByEmail(user, users);
+  const user ={email: req.body.email, password:req.body.password};
+  const id = getUserByEmail(user, users);
 
   if(id !== false) {
     req.session.id = id;
@@ -63,7 +63,7 @@ app.post('/login', (req, res) => {
 
 //delete cookie (username) from logout
 app.post("/logout", (req, res)=> {
-  let user = users[req.session.id];
+  const user = users[req.session.id];
   req.session = null;
   res.redirect("/urls");
 });
@@ -75,11 +75,11 @@ app.get("/register", (req, res) => {
 
 //User post register
 app.post("/register", (req, res) => {
-  let user ={email: req.body.email, password:req.body.password};
-  let getMatch = emailLookup(user, users);
+  const user ={email: req.body.email, password:req.body.password};
+  const getMatch = emailLookup(user, users);
   
   if(getMatch){
-    let id = generateRandomString();
+    const id = generateRandomString();
     users[id] = {id: id, email: req.body.email, password:bcrypt.hashSync(req.body.password, 10)};
     req.session.id = id;
     res.redirect("/urls");
@@ -141,11 +141,17 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
   const longUrl = req.body.longURL;
   const user = req.session.id;
+  const user_id = users[req.session.id];
+  
+  if(user_id === undefined) {
+    res.status(400).send('Bad Request');
+  }
   urlDatabase[shortUrl]= {longURL: longUrl,userID: user};
   res.redirect('/urls');
 });
 
 app.get("/u/:shortURL", (req, res) => {
+
   if (urlDatabase[req.params.shortURL]) {
     const { longURL } = urlDatabase[req.params.shortURL];
     return res.redirect(longURL);
@@ -155,6 +161,12 @@ app.get("/u/:shortURL", (req, res) => {
 
 //for delete
 app.post("/urls/:shortURL/delete", (req, res) => {
+
+  const user_id = users[req.session.id];
+  
+  if(user_id === undefined) {
+    res.status(400).send('Bad Request');
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
   
@@ -164,9 +176,10 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+
 ////////
 function urlsForUser(id) {
-  let urlist = {};
+  const urlist = {};
   for(let key in urlDatabase) {
     if(urlDatabase[key].userID === id){
       urlist[key] = urlDatabase[key];
