@@ -115,8 +115,13 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
   const user = users[req.session.id];
+  
+  if(user === undefined) {
+    res.status(400).send('Bad Request');
+  }
+  
   if(shortUrl === undefined) {
-    res.status(400).send('Bad Request')  
+    res.status(400).send('Bad Request');  
   }
    const templateVars = {user: user, shortURL: shortUrl, longURL: urlDatabase[shortUrl].longURL};
   res.render("urls_show", templateVars);
