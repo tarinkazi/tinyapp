@@ -95,7 +95,6 @@ app.get("/urls", (req, res) => {
 
   if(url !== null) {
     const templateVars ={urls: url, user: users[req.session.id] };
-   console.log(templateVars);
    res.render("urls_index",templateVars);
   }   
 });
@@ -123,8 +122,12 @@ app.get("/urls/:shortURL", (req, res) => {
   if(shortUrl === undefined) {
     res.status(400).send('Bad Request');  
   }
+  if(urlDatabase[req.params.shortURL].userID === req.session.id) {
    const templateVars = {user: user, shortURL: shortUrl, longURL: urlDatabase[shortUrl].longURL};
   res.render("urls_show", templateVars);
+  } else {
+    res.status(400).send('Bad Request');  
+  }
 });
 
 //db update urls
@@ -146,8 +149,12 @@ app.post("/urls/:shortURL", (req, res) => {
   if(user_id === undefined) {
     res.status(400).send('Bad Request');
   }
+  if(urlDatabase[req.params.shortURL].userID === req.session.id) {
   urlDatabase[shortUrl]= {longURL: longUrl,userID: user};
   res.redirect('/urls');
+  } else {
+    res.status(400).send('Bad Request');
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -167,8 +174,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   if(user_id === undefined) {
     res.status(400).send('Bad Request');
   }
+ 
+  if(urlDatabase[req.params.shortURL].userID === req.session.id) {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
+  } else {
+    res.status(400).send('Bad Request');
+  }
   
 });
 
