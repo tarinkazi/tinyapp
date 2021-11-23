@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
-const {getUserByEmail, emailLookup, generateRandomString} = require('./helper');
+const {getUserByEmail, emailLookup, generateRandomString, urlsForUser} = require('./helper');
 const bcrypt = require('bcryptjs');
 const bodyParser = require("body-parser");
 app.set("view engine", "ejs");
@@ -57,7 +57,7 @@ app.post('/login', (req, res) => {
     req.session.id = id;
     return res.redirect("/urls");
   } else {
-       return res.status(403).send('Bad Request')   
+       return res.status(403).send('Invalid User ID or Password');
     }  
 });
 
@@ -84,14 +84,14 @@ app.post("/register", (req, res) => {
     req.session.id = id;
     res.redirect("/urls");
   } else {
-      res.status(400).send('Bad Request')   
+      res.status(400).send('Invalid User ID or Password');
     }
 });
 
 //Urls 
 app.get("/urls", (req, res) => {
   const user = req.session.id;
-  const url = urlsForUser(user);
+  const url = urlsForUser(user, urlDatabase);
 console.log("url",url);
   if(user) {
     const templateVars ={urls: url, user: users[req.session.id] };
@@ -119,17 +119,17 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = users[req.session.id];
   
   if(user === undefined) {
-    res.status(400).send('Bad Request');
+    res.status(400).send(`Sorry, you're not authorized to view or edit this URL.`);
   }
   
   if(shortUrl === undefined) {
-    res.status(400).send('Bad Request');  
+    res.status(400).send(`The short URL you've entered doesn't match with an existing long URL Request`);  
   }
   if(urlDatabase[req.params.shortURL].userID === req.session.id) {
    const templateVars = {user: user, shortURL: shortUrl, longURL: urlDatabase[shortUrl].longURL};
   res.render("urls_show", templateVars);
   } else {
-    res.status(400).send('Bad Request');  
+    res.status(400).send('Invalid Access of ShortURL');  
   }
 });
 
@@ -150,13 +150,13 @@ app.post("/urls/:shortURL", (req, res) => {
   const user_id = users[req.session.id];
   
   if(user_id === undefined) {
-    res.status(400).send('Bad Request');
+    res.status(400).send('Unauthorized User for Edit the URL');
   }
   if(urlDatabase[req.params.shortURL].userID === req.session.id) {
   urlDatabase[shortUrl]= {longURL: longUrl,userID: user};
   res.redirect('/urls');
   } else {
-    res.status(400).send('Bad Request');
+    res.status(400).send('Unauthorized User for Edit the URL');
   }
 });
 
@@ -164,12 +164,10 @@ app.get("/u/:shortURL", (req, res) => {
 
   const shortURL = req.params.shortURL;
   const validShortURL = urlDatabase[shortURL];
-  //console.log("validShortURL",validShortURL);
   if(!validShortURL){
     return res.status(400).send("Sorry, there is no longURL associated with the shortURL provided");
   }
   const longURL = urlDatabase[shortURL].longURL;
-  console.log("longURL",longURL);
   res.redirect(longURL);
 });
 
@@ -179,14 +177,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = users[req.session.id];
   
   if(user_id === undefined) {
-    res.status(400).send('Bad Request');
+    res.status(400).send('Unauthorized User for delete the URL');
   }
  
   if(urlDatabase[req.params.shortURL].userID === req.session.id) {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
   } else {
-    res.status(400).send('Bad Request');
+    res.status(400).send('Unauthorized User for delete the URL');
   }
   
 });
@@ -195,18 +193,6 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
-////////
-function urlsForUser(id) {
-  const urlist = {};
-  for(let key in urlDatabase) {
-    if(urlDatabase[key].userID === id){
-      urlist[key] = urlDatabase[key];
-    }
-  }
-  return urlist;
-};
-
 ////////Partial get
 app.get("/", (req, res) => {
   if(req.session.id){
@@ -214,15 +200,6 @@ app.get("/", (req, res) => {
   }
   res.redirect("/urls");
 });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//  const templateVars = { greeting: 'Hello World2', run: 'hi'};
-//  res.render("hello_world", templateVars);
-// });
 
 
 

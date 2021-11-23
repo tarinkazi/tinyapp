@@ -43,5 +43,15 @@ function generateRandomString() {
     return result;
 };
 
+function urlsForUser(id, urlDatabase) {
+  const urlist = {};
+  for(let key in urlDatabase) {
+    if(urlDatabase[key].userID === id){
+      urlist[key] = urlDatabase[key];
+    }
+  }
+  return urlist;
+};
 
-module.exports = {getUserByEmail, emailLookup, generateRandomString};
+
+module.exports = {getUserByEmail, emailLookup, generateRandomString, urlsForUser};
