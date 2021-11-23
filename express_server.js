@@ -55,9 +55,9 @@ app.post('/login', (req, res) => {
 
   if(id !== false) {
     req.session.id = id;
-    res.redirect("/urls");
+    return res.redirect("/urls");
   } else {
-      res.status(403).send('Bad Request')   
+       return res.status(403).send('Bad Request')   
     }  
 });
 
@@ -92,11 +92,13 @@ app.post("/register", (req, res) => {
 app.get("/urls", (req, res) => {
   const user = req.session.id;
   const url = urlsForUser(user);
-
-  if(url !== null) {
+console.log("url",url);
+  if(user) {
     const templateVars ={urls: url, user: users[req.session.id] };
-   res.render("urls_index",templateVars);
-  }   
+   return res.render("urls_index",templateVars);
+  } else {
+    return res.status(400).send("To access TinyApp, please <a href= '/login'> login </a> or <a href= '/register'> register </a>");
+  }
 });
 
 //New Url
@@ -107,6 +109,7 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new",templateVars);
   } else {
       res.redirect("/login");
+      return res.status(400).send("Please login or register to create a new URL");
     }
 });
 
@@ -159,11 +162,15 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
 
-  if (urlDatabase[req.params.shortURL]) {
-    const { longURL } = urlDatabase[req.params.shortURL];
-    return res.redirect(longURL);
-  } 
-    res.status(400).send('Bad Request');
+  const shortURL = req.params.shortURL;
+  const validShortURL = urlDatabase[shortURL];
+  //console.log("validShortURL",validShortURL);
+  if(!validShortURL){
+    return res.status(400).send("Sorry, there is no longURL associated with the shortURL provided");
+  }
+  const longURL = urlDatabase[shortURL].longURL;
+  console.log("longURL",longURL);
+  res.redirect(longURL);
 });
 
 //for delete
@@ -208,14 +215,14 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
-app.get("/hello", (req, res) => {
- const templateVars = { greeting: 'Hello World2', run: 'hi'};
- res.render("hello_world", templateVars);
-});
+// app.get("/hello", (req, res) => {
+//  const templateVars = { greeting: 'Hello World2', run: 'hi'};
+//  res.render("hello_world", templateVars);
+// });
 
 
 
